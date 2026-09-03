@@ -1,0 +1,532 @@
+/* src/assets/css/cyberpunk.css */
+/* EspecificaÃƒÂ§ÃƒÂ£o de VariÃƒÂ¡veis e Isolamento CSS Cyberpunk */
+.cyber-card-matrix {
+  --neon-border: rgba(77, 118, 255, 0.6);
+  --neon-glow: rgba(77, 118, 255, 0.25);
+  --translucent-bg: rgba(6, 12, 24, 0.65);
+
+  position: relative;
+  background: var(--translucent-bg);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(25px);
+  -webkit-backdrop-filter: blur(25px);
+  z-index: 10;
+
+  /* AceleraÃƒÂ§ÃƒÂ£o de hardware preventiva */
+  will-change: transform, opacity;
+  transform: translateZ(0);
+}
+
+/* Degradação progressiva baseada em densidades de tela e restrições de movimento */
+@media screen and (max-width: 1024px) {
+  .cyber-card-matrix {
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    background: rgba(6, 12, 24, 0.75);
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .cyber-card-matrix {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background: rgba(6, 12, 24, 0.95) !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cyber-card-matrix {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background: rgba(6, 12, 24, 0.98) !important;
+    animation: none !important;
+  }
+}
+
+.cyber-glass-container {
+  box-shadow:
+    0 10px 30px rgba(0, 0, 0, 0.5),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.03);
+  transition:
+    transform 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275),
+    border-color 0.3s ease,
+    box-shadow 0.3s ease;
+  overflow: hidden;
+}
+
+/* Isolamento de hover para dispositivos com ponteiro (Desktop) */
+.cyber-glass-container::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -50%;
+  width: 25%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.08),
+    transparent
+  );
+  transform: skewX(-25deg);
+  pointer-events: none;
+  transition: left 0.75s ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .cyber-glass-container:hover {
+    border-color: var(--neon-border);
+    box-shadow:
+      0 15px 40px rgba(0, 0, 0, 0.6),
+      0 0 25px var(--neon-glow),
+      inset 0 0 0 1px rgba(77, 118, 255, 0.2);
+    transform: translateY(-4px) translateZ(0);
+  }
+  .cyber-glass-container:hover::after {
+    left: 125%;
+  }
+}
+
+/* Feedback tátil para dispositivos móveis */
+@media (pointer: coarse) {
+  .cyber-glass-container {
+    transition: transform 0.1s
+      var(--ease-cyber-instant, cubic-bezier(0, 0, 0.2, 1));
+  }
+  .cyber-glass-container:active {
+    transform: scale(0.97);
+    border-color: var(--primary-electric, #4d76ff);
+    box-shadow: 0 0 12px rgba(77, 118, 255, 0.4);
+  }
+}
+
+:root {
+  --bottom-nav-height: calc(65px + env(safe-area-inset-bottom));
+}
+
+/* ======================================================================
+   ADMIN LAYOUT Ã¢â‚¬â€ Grid principal: Sidebar + ConteÃƒÂºdo
+   ====================================================================== */
+.admin-layout {
+  display: flex;
+  flex-direction: column-reverse;
+  height: 100vh; /* Fallback */
+  height: 100dvh; /* Moderno */
+  width: 100vw;
+  overflow: hidden;
+  background: var(--bg, #0b0f19);
+}
+
+/* ======================================================================
+   SIDEBAR Ã¢â‚¬â€ Menu lateral glassmorphic (Bottom Nav no Mobile)
+   ====================================================================== */
+.admin-sidebar {
+  width: 100%;
+  height: var(--bottom-nav-height);
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  align-items: center;
+  padding: 0 10px;
+  padding-bottom: env(safe-area-inset-bottom);
+  background: rgba(6, 12, 24, 0.95);
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
+  border-top: 1px solid rgba(0, 255, 204, 0.1);
+  box-shadow: 0 -4px 30px rgba(0, 0, 0, 0.4);
+  z-index: 1000;
+
+  /* GPU acceleration */
+  will-change: transform;
+  transform: translateZ(0);
+}
+
+/* Branding */
+.sidebar-brand {
+  display: none; /* Oculta a logo/marca no mobile */
+}
+
+/* Divider */
+.sidebar-divider {
+  display: none; /* Oculta divisÃƒÂ³ria no mobile */
+}
+
+/* Navigation */
+.sidebar-nav {
+  display: contents; /* No mobile, os botÃµes viram filhos diretos do sidebar */
+}
+
+.sidebar-nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 8px 4px;
+  border: none;
+  background: transparent;
+  color: var(--text-sub, #8a99ad);
+  font-size: 0.65rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  width: 100%;
+  max-width: 70px;
+}
+
+.sidebar-nav-item span {
+  display: block; /* Opcional: mostrar texto pequeno sob o ÃƒÂ­cone no mobile, ou none se preferir */
+}
+
+.sidebar-nav-item svg {
+  flex-shrink: 0;
+  transition:
+    transform 0.25s ease,
+    stroke 0.25s ease;
+}
+
+.sidebar-nav-item:hover {
+  background: rgba(0, 255, 204, 0.06);
+  border-color: rgba(0, 255, 204, 0.12);
+  color: white;
+  transform: translateX(4px);
+}
+
+.sidebar-nav-item:hover svg {
+  stroke: #00ffcc;
+  transform: scale(1.1);
+}
+
+/* Active state */
+.sidebar-nav-item.active {
+  color: var(--neon-green, #00ffcc);
+  font-weight: 600;
+}
+
+.sidebar-nav-item.active::before {
+  content: none;
+}
+
+.sidebar-nav-item.active svg {
+  stroke: var(--neon-green, #00ffcc);
+}
+
+/* Logout */
+.sidebar-logout {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.sidebar-logout:hover {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: rgba(239, 68, 68, 0.25);
+  color: #ef4444;
+}
+
+.sidebar-logout:hover svg {
+  stroke: #ef4444;
+}
+
+/* ======================================================================
+   ADMIN MAIN CONTENT Ã¢â‚¬â€ ÃƒÂrea de conteÃƒÂºdo dinÃƒÂ¢mico
+   ====================================================================== */
+.admin-main-content {
+  flex: 1;
+  height: calc(100vh - var(--bottom-nav-height));
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 0;
+  position: relative;
+}
+
+/* Scrollbar customizada para a ÃƒÂ¡rea principal */
+.admin-main-content::-webkit-scrollbar {
+  width: 6px;
+}
+.admin-main-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+.admin-main-content::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 99px;
+}
+.admin-main-content:hover::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* ======================================================================
+   ADMIN VIEW CONTAINERS Ã¢â‚¬â€ Estilos para as sub-views
+   ====================================================================== */
+.admin-view-container {
+  padding: 2.5rem 3rem;
+  max-width: 1100px;
+  margin: 0 auto;
+  animation: viewFadeIn 0.4s ease forwards;
+}
+
+.admin-view-header {
+  margin-bottom: 2rem;
+}
+
+.admin-view-title {
+  font-size: 1.8rem;
+  font-weight: 800;
+  background: linear-gradient(to right, #4facfe 0%, #00f2fe 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin: 0 0 0.5rem 0;
+}
+
+.admin-view-subtitle {
+  color: var(--text-sub, #8a99ad);
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+.admin-view-body {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+@keyframes viewFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ======================================================================
+   DESKTOP SCALING Ã¢â‚¬â€ Escalonamento para Monitores (min-width: 768px)
+   ====================================================================== */
+@media (min-width: 768px) {
+  .admin-layout {
+    flex-direction: row;
+  }
+
+  .admin-sidebar {
+    width: 260px;
+    height: 100vh;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: stretch;
+    padding: 1.5rem 1rem;
+    border-top: none;
+    border-right: 1px solid rgba(0, 255, 204, 0.1);
+    box-shadow: 4px 0 30px rgba(0, 0, 0, 0.4);
+    background: rgba(6, 12, 24, 0.85);
+  }
+
+  .sidebar-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 0.5rem 0.75rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .sidebar-avatar {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    background: linear-gradient(
+      135deg,
+      var(--primary, #2549d3),
+      var(--primary-electric, #4d76ff)
+    );
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 0.9rem;
+    letter-spacing: 1px;
+    flex-shrink: 0;
+    box-shadow: 0 4px 15px rgba(37, 73, 211, 0.4);
+  }
+
+  .sidebar-brand-text {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .sidebar-brand-name {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: white;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .sidebar-brand-role {
+    font-size: 0.65rem;
+    font-weight: 500;
+    color: var(--text-sub, #8a99ad);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+  }
+
+  .sidebar-divider {
+    display: block;
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(0, 255, 204, 0.15),
+      transparent
+    );
+    margin: 0.75rem 0;
+    flex-shrink: 0;
+  }
+
+  .sidebar-nav {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    gap: 4px;
+    flex: 1;
+  }
+
+  .sidebar-nav-item {
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 12px;
+    padding: 0.7rem 0.9rem;
+    border-radius: 10px;
+    width: 100%;
+    max-width: 100%;
+    position: relative;
+    font-size: 0.85rem;
+  }
+
+  table.responsive-table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    border: 0;
+  }
+}
+
+.sidebar-nav-item span {
+  display: inline;
+}
+
+.sidebar-nav-item.active {
+  background: rgba(37, 73, 211, 0.15);
+  border-color: rgba(37, 73, 211, 0.3);
+  color: white;
+}
+
+.sidebar-nav-item.active::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 15%;
+  height: 70%;
+  width: 3px;
+  border-radius: 0 4px 4px 0;
+  background: linear-gradient(
+    180deg,
+    var(--primary, #2549d3),
+    var(--primary-electric, #4d76ff)
+  );
+  box-shadow: 0 0 10px rgba(37, 73, 211, 0.5);
+}
+
+.sidebar-nav-item.active svg {
+  stroke: var(--primary-electric, #4d76ff);
+}
+
+.sidebar-logout {
+  margin-top: auto;
+  flex-shrink: 0;
+}
+
+.admin-main-content {
+  height: 100vh; /* Fallback */
+  height: 100dvh; /* Moderno */
+}
+
+/* Layout padrão de tabelas para Mobile (Cartões) */
+table.responsive-table tr {
+  display: block;
+  background: rgba(6, 12, 24, 0.5);
+  border: 1px solid rgba(0, 255, 204, 0.15);
+  margin-bottom: 12px;
+  padding: 12px;
+  border-radius: 6px;
+  transition: border-color 0.3s ease;
+}
+
+table.responsive-table tr:hover {
+  border-color: #00ffcc;
+}
+
+table.responsive-table td {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(0, 255, 204, 0.05);
+  text-align: right;
+  font-size: 13px;
+}
+
+table.responsive-table td:last-child {
+  border-bottom: none;
+}
+
+table.responsive-table td::before {
+  content: attr(data-label);
+  font-weight: bold;
+  color: #00ffcc;
+  text-transform: uppercase;
+  font-size: 11px;
+  letter-spacing: 0.5px;
+  text-align: left;
+}
+
+@media (min-width: 768px) {
+  table.responsive-table {
+    display: table;
+  }
+  table.responsive-table thead {
+    display: table-header-group;
+  }
+  table.responsive-table tbody {
+    display: table-row-group;
+  }
+  table.responsive-table tr {
+    display: table-row;
+    background: none;
+    border: none;
+  }
+  table.responsive-table tr:nth-child(even) {
+    background: rgba(0, 255, 204, 0.02);
+  }
+  table.responsive-table td {
+    display: table-cell;
+    padding: 12px 16px;
+    border-bottom: 1px solid rgba(0, 255, 204, 0.15);
+    text-align: left;
+    font-size: 14px;
+  }
+  table.responsive-table td::before {
+    display: none;
+  }
+}
+
+/* Correção do Flex para Sidebar Nav no mobile */

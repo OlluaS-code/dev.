@@ -1,0 +1,225 @@
+/* Cyber-Minimalist Auth Styles */
+
+:root {
+  --auth-bg-dark: #0B0F19;
+  --auth-accent-neon: #2549D3;
+  --auth-accent-glow: #10b981;
+  --auth-surface: rgba(255, 255, 255, 0.03);
+  --auth-border: rgba(255, 255, 255, 0.08);
+  --auth-text-primary: #ffffff;
+  --auth-text-muted: #8892b0;
+}
+
+.auth-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  width: 100%;
+  background: var(--auth-bg-dark);
+  font-family: 'Inter', sans-serif;
+  color: var(--auth-text-primary);
+  position: relative;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 40px 20px;
+}
+
+/* Glassmorphism Bento Box */
+.auth-bento {
+  position: relative;
+  width: 100%;
+  max-width: 550px; /* Esticado mais um pouco */
+  background: var(--auth-surface);
+  border: 1px solid var(--auth-border);
+  border-radius: 24px;
+  padding: 24px 32px; /* Reduzido o padding vertical de 32px para 24px */
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  z-index: 10;
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  will-change: transform, opacity;
+}
+
+.auth-header {
+  text-align: center;
+  margin-bottom: 16px; /* Reduzido de 24px para 16px */
+}
+
+.auth-title {
+  font-size: 1.5rem; /* Levemente menor para poupar altura */
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  margin-bottom: 4px; /* Reduzido de 8px para 4px */
+  background: linear-gradient(180deg, #fff 0%, #a1a1aa 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.auth-subtitle {
+  font-size: 0.875rem;
+  color: var(--auth-text-muted);
+  font-family: 'Fira Code', monospace;
+}
+
+/* Form Elements */
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px; /* Reduzido de 16px para 12px */
+}
+
+.auth-input-group {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 6px; /* Reduzido de 8px para 6px */
+}
+
+.auth-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--auth-text-muted);
+  font-weight: 600;
+}
+
+.auth-input {
+  width: 100%;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--auth-border);
+  border-radius: 12px;
+  padding: 12px 16px; /* Altura do input reduzida (era 16px) */
+  color: #fff;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.875rem;
+  transition: all 0.3s ease;
+  outline: none;
+}
+
+.auth-input:focus {
+  border-color: var(--auth-accent-neon);
+  box-shadow: 0 0 0 4px rgba(37, 73, 211, 0.15);
+  /* Refração SVG acionada no JS */
+}
+
+/* Efeito Glitch no erro */
+.input-error {
+  animation: auth-glitch 0.3s cubic-bezier(.25, .46, .45, .94) both;
+  border-color: #ef4444 !important;
+}
+
+@keyframes auth-glitch {
+  0% { transform: translate(0) }
+  20% { transform: translate(-2px, 2px) }
+  40% { transform: translate(-2px, -2px) }
+  60% { transform: translate(2px, 2px) }
+  80% { transform: translate(2px, -2px) }
+  100% { transform: translate(0) }
+}
+
+.auth-submit {
+  width: 100%;
+  padding: 12px; /* Reduzido de 16px para 12px */
+  background: var(--auth-accent-neon);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-top: 8px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+}
+
+.auth-submit:hover {
+  background: #1e3bb3;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(37, 73, 211, 0.3);
+}
+
+.auth-submit:active {
+  transform: translateY(0);
+}
+
+.auth-link-text {
+  text-align: center;
+  margin-top: 16px; /* Reduzido de 24px para 16px */
+  font-size: 0.875rem;
+  color: var(--auth-text-muted);
+}
+
+.auth-link {
+  color: var(--auth-accent-neon);
+  text-decoration: none;
+  font-weight: 600;
+  cursor: pointer;
+  transition: color 0.2s;
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: inherit;
+}
+
+.auth-link:hover {
+  color: #60a5fa;
+}
+
+/* Password Visualizer */
+.entropy-container {
+  margin-top: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.entropy-bars {
+  display: flex;
+  gap: 4px;
+  height: 4px;
+}
+
+.entropy-bar {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+  transition: background 0.4s ease;
+}
+
+.entropy-text {
+  font-size: 0.7rem;
+  text-align: right;
+  font-family: 'Fira Code', monospace;
+  color: var(--auth-text-muted);
+}
+
+.entropy-1 .entropy-bar:nth-child(1) { background: #ef4444; box-shadow: 0 0 8px #ef4444; }
+.entropy-2 .entropy-bar:nth-child(1), .entropy-2 .entropy-bar:nth-child(2) { background: #f59e0b; box-shadow: 0 0 8px #f59e0b; }
+.entropy-3 .entropy-bar:nth-child(1), .entropy-3 .entropy-bar:nth-child(2), .entropy-3 .entropy-bar:nth-child(3) { background: #10b981; box-shadow: 0 0 8px #10b981; }
+.entropy-4 .entropy-bar { background: #3b82f6; box-shadow: 0 0 8px #3b82f6; }
+
+/* Background Particles (Animated by JS) */
+#auth-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.auth-log {
+  margin-top: 16px;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.75rem;
+  color: var(--auth-accent-glow);
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
