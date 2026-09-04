@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Showcase de Projetos | Portfolio 2026</title>
+  <link rel="icon" type="image/png" href="./public/favicon.png">
+  <link rel="stylesheet" href="./src/assets/css/style.css">
+  <style>
+    /* Estado inicial da página inteira invisível e "lá em cima" */
+    .page-transition-wrapper {
+      opacity: 0;
+      transform: translateY(-50px);
+      /* Vem de cima descendo */
+      transition: transform 0.8s cubic-bezier(0.76, 0, 0.24, 1), opacity 0.8s ease;
+    }
+
+    /* Classe que será adicionada via JS para a página "pousar" */
+    .page-transition-wrapper.loaded {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="page-transition-wrapper">
+
+    <div class="search-wrapper">
+      <div class="search-container">
+        <form id="search-form">
+          <div class="search-icon-container">
+            <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+          </div>
+          <input type="text" id="search" placeholder="Pesquisar projeto..." autocomplete="off">
+        </form>
+      </div>
+    </div>
+
+    <div class="cover"></div>
+
+    <div id="demo"></div>
+
+    <div class="cover"></div>
+
+    <div id="demo"></div>
+
+    <div class="details" id="details-container">
+      <div class="place-box">
+        <div class="text">Localização</div>
+      </div>
+      <div class="title-box">
+        <div class="title-main" id="title-1">TÍTULO</div>
+        <div class="title-main" id="title-2" style="color: var(--primary)">SUBTÍTULO</div>
+      </div>
+      <div class="desc" id="description">
+        Carregando detalhes do projeto selecionado...
+      </div>
+
+      <div class="cta">
+        <button class="btn-icon">
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path
+              d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+          </svg>
+        </button>
+        <button class="btn-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8m-16-4l7-7 7 7m-7-7v13" />
+          </svg>
+        </button>
+        <button class="btn-discover">Ver Projeto</button>
+      </div>
+    </div>
+
+    <div class="pagination">
+      <div class="nav-arrows">
+        <div class="arrow" id="prev">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+          </svg>
+        </div>
+        <div class="arrow" id="next">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+          </svg>
+        </div>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="progress"></div>
+      </div>
+      <div class="slide-numbers" id="numbers"></div>
+    </div>
+
+    <div id="project-modal" class="modal-overlay">
+      <div class="modal-content">
+        <button class="modal-close" id="close-modal">&times;</button>
+
+        <div class="modal-body">
+          <div class="carousel-container">
+            <button class="carousel-arrow prev" id="modal-prev">&#10094;</button>
+            <div id="modal-media-wrapper" class="modal-media-wrapper">
+            </div>
+            <button class="carousel-arrow next" id="modal-next">&#10095;</button>
+          </div>
+
+          <div class="modal-info">
+            <h2 id="modal-project-title"></h2>
+            <p id="modal-project-desc"></p>
+
+            <div class="modal-actions">
+              <button class="btn-social">
+                <svg viewBox="0 0 24 24" width="18" fill="currentColor">
+                  <path
+                    d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                </svg>
+                Curtir
+              </button>
+              <button class="btn-social">
+                <svg viewBox="0 0 24 24" width="18" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8m-16-4l7-7 7 7m-7-7v13" />
+                </svg>
+                Compartilhar
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script type="module" src="./src/pages/Projects.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      setTimeout(() => {
+        document.querySelector('.page-transition-wrapper').classList.add('loaded');
+      }, 50);
+    });
+  </script>
+</body>
+
+</html>

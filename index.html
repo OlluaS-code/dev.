@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="OlluaS-code — Portfólio de Saullo, Software Engineer especialista em Frontend, Backend, Mobile e DevOps. Projetos de alta performance.">
+    <title>OlluaS-code | Saullo — Software Engineer</title>
+    <link rel="icon" type="image/png" href="./public/favicon.png">
+
+    <!-- Resource hints: pré-conecta nas origens de fontes para reduzir latência -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+
+    <link rel="stylesheet" href="./src/assets/css/styles.css">
+    <link rel="stylesheet" href="./src/assets/css/auth.css">
+    <link rel="stylesheet" href="./src/assets/css/cyberpunk.css">
+</head>
+
+<body>
+    <!-- Canvas interativo + camada fosca (preservados) -->
+    <canvas id="canvas"></canvas>
+    <div class="glass-layer"></div>
+
+    <!-- Filtros SVG gooey para o text morphing (invisíveis) -->
+    <svg xmlns="http://www.w3.org/2000/svg" style="display:none; position:absolute;">
+        <defs>
+            <filter id="threshold-goo">
+                <feGaussianBlur in="SourceGraphic" stdDeviation="5" result="blur" />
+                <feColorMatrix in="blur" mode="matrix"
+                    values="1 0 0 0 0
+                            0 1 0 0 0
+                            0 0 1 0 0
+                            0 0 0 22 -10" />
+            </filter>
+        </defs>
+    </svg>
+
+    <!-- Nav (preservada, fora do wrapper para ficar sempre visível) -->
+    <nav class="top-nav">
+        <div class="nav-section left">
+            <div class="notification-wrapper" id="notification-trigger">
+                <div class="nav-icon-btn">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                        <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                    </svg>
+                    <span class="notification-badge" id="notif-badge" style="display: none;"></span>
+                </div>
+                <div class="nav-dropdown notification-panel">
+                    <div class="dropdown-header">Notificações</div>
+                    <div class="dropdown-content" id="notif-list">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="nav-section right">
+            <div class="user-wrapper" id="user-trigger">
+                <div id="user-logged-in" class="user-status-container hidden">
+                    <div class="user-info">
+                        <span class="user-name" id="display-user-name">Usuário</span>
+                        <div class="user-avatar">U</div>
+                    </div>
+                    <div class="nav-dropdown user-panel">
+                        <button class="logout-btn" id="logout-action">Log-out</button>
+                    </div>
+                </div>
+                <div id="user-logged-out" class="user-status-container">
+                    <button class="login-trigger-btn" id="login-action">Login / Register</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ============================================================
+         LANDING PAGE WRAPPER (animado para fora ao entrar em projetos)
+         ============================================================ -->
+    <div class="landing-page-wrapper" id="landing-wrapper">
+
+        <!-- ─── HERO SECTION ─── -->
+        <main class="ui-container">
+            <h1 class="brand-title">OlluaS-code</h1>
+
+            <!-- Logo SVG Animado da marca OlluaS-code -->
+            <div class="brand-logo-container" id="brand-logo">
+                <div class="logo-svg-wrapper">
+                    <svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <!-- Gradiente azul tech das fitas -->
+                            <linearGradient id="gradBlue" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%"   stop-color="#2549D3"/>
+                                <stop offset="50%"  stop-color="#4D76FF"/>
+                                <stop offset="100%" stop-color="#2549D3"/>
+                            </linearGradient>
+                            <!-- Gradiente metálico prata das fitas -->
+                            <linearGradient id="gradSilver" x1="100%" y1="0%" x2="0%" y2="100%">
+                                <stop offset="0%"   stop-color="#8C8C8C"/>
+                                <stop offset="35%"  stop-color="#E8E8E8"/>
+                                <stop offset="65%"  stop-color="#C0C0C0"/>
+                                <stop offset="100%" stop-color="#8C8C8C"/>
+                            </linearGradient>
+                            <!-- Gradiente para o círculo central -->
+                            <radialGradient id="gradDot" cx="50%" cy="35%" r="60%">
+                                <stop offset="0%"   stop-color="#6E9BFF"/>
+                                <stop offset="100%" stop-color="#2549D3"/>
+                            </radialGradient>
+                        </defs>
+
+                        <!-- Fita hexagonal PRATA (fundo) -->
+                        <path class="hex-line-silver"
+                            d="M60 8
+                               L95 28 L95 68
+                               L60 88 L25 68 L25 28 Z"
+                            stroke="url(#gradSilver)"
+                            stroke-width="3.5"
+                            stroke-linejoin="round"
+                            fill="none"
+                            opacity="0.85"/>
+
+                        <!-- Hexágono interno delicado (contorno) -->
+                        <path class="logo-inner-hex"
+                            d="M60 28
+                               L79 39 L79 61
+                               L60 72 L41 61 L41 39 Z"
+                            stroke="rgba(192,192,192,0.3)"
+                            stroke-width="1"
+                            fill="none"/>
+
+                        <!-- Fita hexagonal AZUL (frente, cruzada) -->
+                        <path class="hex-line-blue"
+                            d="M38 16
+                               L60 4 L82 16
+                               L82 50 L70 56
+                               L70 80 L60 86 L50 80
+                               L50 56 L38 50 Z"
+                            stroke="url(#gradBlue)"
+                            stroke-width="3.5"
+                            stroke-linejoin="round"
+                            fill="none"/>
+
+                        <!-- Círculo central azul -->
+                        <circle class="logo-center-dot"
+                            cx="60" cy="58" r="7"
+                            fill="url(#gradDot)"/>
+                        <!-- Anel externo do círculo -->
+                        <circle class="logo-center-dot"
+                            cx="60" cy="58" r="11"
+                            stroke="rgba(37,73,211,0.4)"
+                            stroke-width="1"
+                            fill="none"
+                            style="animation-delay: 1.75s;"/>
+                    </svg>
+                </div>
+
+                <!-- Tipografia da marca com cores corretas -->
+                <div class="logo-brand-text">
+                    <div class="logo-title">
+                        <span class="brand-blue">OlluaS</span><span class="brand-silver">-code</span>
+                    </div>
+                    <!-- Text Morphing da tagline -->
+                    <div class="morph-container" id="morph-wrapper">
+                        <span class="morph-text" id="morph-text-1">SOFTWARE ENGINEER</span>
+                        <span class="morph-text" id="morph-text-2" style="opacity:0;"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Search wrapper (home) -->
+            <div class="search-wrapper">
+                <div class="search-container">
+                    <form id="search-form">
+                        <div class="search-icon-container">
+                            <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="11" cy="11" r="8"></circle>
+                                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                            </svg>
+                        </div>
+                        <input type="text" id="search" placeholder="Pesquisar..." autocomplete="off">
+                    </form>
+                </div>
+
+                <div class="search-categories" id="categories-menu">
+                    <span class="category-pill" data-category="Frontend">Frontend</span>
+                    <span class="category-pill" data-category="Backend">Backend</span>
+                    <span class="category-pill" data-category="Mobile">Mobile</span>
+                    <span class="category-pill" data-category="FullStack">FullStack</span>
+                    <span class="category-pill" data-category="DevOps">DevOps</span>
+                </div>
+            </div>
+
+            <!-- Botão explorar projetos -->
+            <button class="action-btn" id="explore-btn">
+                <h2 class="cta-text">EXPLORAR PROJETOS</h2>
+                <div class="arrow-icon">
+                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                        <path d="M12 5v14M19 12l-7 7-7-7" />
+                    </svg>
+                </div>
+            </button>
+
+            <!-- Feed container (usado quando há resultado de busca na home) -->
+            <div id="feed-container" class="hidden"></div>
+
+            <!-- Hint de scroll para a seção Tech Stack -->
+            <div class="scroll-hint" id="scroll-hint">
+                <div class="scroll-hint-line"></div>
+                <span class="scroll-hint-text">Especialidades</span>
+            </div>
+        </main>
+
+        <!-- ─── TECH STACK SECTION ─── -->
+        <section id="tech-stack-section" class="tech-stack-section">
+            <h2 class="tech-section-title" id="tech-title">Stack &amp; Especialidades</h2>
+
+            <div class="bento-grid" id="bento-grid-container">
+                <!-- Cards serão injetados dinamicamente via JS -->
+            </div>
+        </section>
+
+    </div><!-- /.landing-page-wrapper -->
+
+    <!-- ─── PROJECTS SECTION (SPA — fora do wrapper) ─── -->
+    <section id="projects-section" class="projects-section hidden">
+        <div id="demo"></div>
+
+        <!-- Botão Voltar para UX de navegação -->
+        <button id="back-to-home-btn" class="back-nav-btn" aria-label="Voltar para Projetos">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="19" y1="12" x2="5" y2="12"></line>
+                <polyline points="12 19 5 12 12 5"></polyline>
+            </svg>
+            <span>Voltar</span>
+        </button>
+
+        <div class="details" id="details-container">
+            <div class="place-box">
+                <div class="text">Localização</div>
+            </div>
+            <div class="title-box">
+                <div class="title-main" id="title-1">TÍTULO</div>
+                <div class="title-main" id="title-2" style="color: var(--primary)">SUBTÍTULO</div>
+            </div>
+            <div class="desc" id="description">
+                Carregando detalhes do projeto selecionado...
+            </div>
+
+            <div class="cta">
+                <button class="btn-icon" id="feed-btn-like">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="heart-icon">
+                        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                    </svg>
+                </button>
+                <button class="btn-icon" id="feed-btn-share">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8m-16-4l7-7 7 7m-7-7v13" />
+                    </svg>
+                </button>
+                <button class="btn-discover">Ver Projeto</button>
+            </div>
+        </div>
+
+        <div class="pagination">
+            <div class="nav-arrows">
+                <div class="arrow" id="prev">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                    </svg>
+                </div>
+                <div class="arrow" id="next">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                </div>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress"></div>
+            </div>
+            <div class="slide-numbers" id="numbers"></div>
+        </div>
+
+        <!-- Modal de projeto -->
+        <div id="project-modal" class="modal-overlay">
+            <div class="modal-content">
+                <button class="modal-close" id="close-modal">&times;</button>
+
+                <div class="modal-body">
+                    <div class="carousel-container">
+                        <button class="carousel-arrow prev" id="modal-prev">&#10094;</button>
+                        <div id="modal-media-wrapper" class="modal-media-wrapper">
+                        </div>
+                        <button class="carousel-arrow next" id="modal-next">&#10095;</button>
+                    </div>
+
+                    <div class="modal-info">
+                        <div class="modal-text-details">
+                            <h2 id="modal-project-title"></h2>
+                            <p id="modal-project-desc"></p>
+                        </div>
+
+                        <div class="modal-actions">
+                            <button class="btn-social" id="btn-like">
+                                <svg viewBox="0 0 24 24" width="18" fill="none" stroke="currentColor" stroke-width="2" class="heart-icon">
+                                    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                                </svg>
+                                <span>Curtir</span>
+                            </button>
+                            <button class="btn-social" id="btn-share">
+                                <svg viewBox="0 0 24 24" width="18" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8m-16-4l7-7 7 7m-7-7v13" />
+                                </svg>
+                                <span>Compartilhar</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Admin SPA Container -->
+    <div id="admin-container" class="hidden" style="position: absolute; top: 0; left: 0; width: 100%; min-height: 100vh; z-index: 1000; background: #0B0F19;"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="./src/assets/js/background-anim.js"></script>
+    <script type="module" src="./src/app.js"></script>
+</body>
+
+</html>
