@@ -211,7 +211,16 @@ export const Navbar = {
         const user = JSON.parse(userStr);
         userLoggedIn.classList.remove("hidden");
         userLoggedOut.classList.add("hidden");
-        displayUserName.innerText = user.name || "Admin";
+        
+        const displayName = user.name || "Admin";
+        displayUserName.innerText = displayName;
+        displayUserName.style.color = "#FFFFFF"; // Nome em branco
+        
+        // Define a primeira letra no avatar (maiúscula)
+        const userAvatar = document.querySelector(".user-avatar");
+        if (userAvatar) {
+          userAvatar.innerText = displayName.charAt(0).toUpperCase();
+        }
       } catch (e) {
         // Fallback
       }

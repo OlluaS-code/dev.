@@ -29,7 +29,7 @@ function setupRegister() {
   // Web Worker for Password Entropy
   let worker;
   try {
-    worker = new Worker("../src/utils/entropyWorker.js");
+    worker = new Worker("./src/utils/entropyWorker.js");
     worker.onmessage = (e) => {
       const { score, feedback } = e.data;
       entropyContainer.className = `entropy-container entropy-${score}`;
