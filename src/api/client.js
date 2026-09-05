@@ -1,6 +1,6 @@
 const API_URL = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1" 
-  ? "http://localhost:3000/api" // Dev local sem docker precisa bater na raiz /api
-  : "/api"; // Produção / Caddy Proxy
+  ? "http://localhost:3000/api" // Dev local
+  : "https://deaf-clownfish-olluas-code-dd56f698.koyeb.app/api"; // Backend na Koyeb
 
 const getHeaders = () => {
   const token = localStorage.getItem("token");
