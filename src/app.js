@@ -293,7 +293,77 @@ async function loadDynamicSpecs() {
   }
 }
 
+/**
+ * Monitor Dinâmico de Viewport Mobile Real
+ * Sincroniza a altura útil líquida e Safe Areas contra o recolhimento e expansão
+ * de barras de URL nativas do Android Chrome e iOS Safari.
+ * Atualiza as variáveis CSS --app-height, --app-width, --safe-inset-top e --safe-inset-bottom.
+ */
+function initDynamicMobileViewport() {
+  const syncViewportMetrics = () => {
+    // 1. Apuração das dimensões líquidas via VisualViewport API (mais precisa que innerWidth/Height)
+    const visualW = window.visualViewport ? window.visualViewport.width : window.innerWidth;
+    const visualH = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+
+    document.documentElement.style.setProperty('--app-height', `${visualH}px`);
+    document.documentElement.style.setProperty('--app-width', `${visualW}px`);
+
+    // 2. Extração programática de Safe Areas via elemento de teste descartável
+    const testDiv = document.createElement('div');
+    testDiv.style.cssText = `
+      position: fixed;
+      top: 0; left: 0;
+      padding-top: env(safe-area-inset-top, 0px);
+      padding-bottom: env(safe-area-inset-bottom, 0px);
+      pointer-events: none;
+      visibility: hidden;
+    `;
+    document.body.appendChild(testDiv);
+    const computed = window.getComputedStyle(testDiv);
+    const safeTop = computed.paddingTop;
+    const safeBottom = computed.paddingBottom;
+    document.body.removeChild(testDiv);
+
+    document.documentElement.style.setProperty('--safe-inset-top', safeTop);
+    document.documentElement.style.setProperty('--safe-inset-bottom', safeBottom);
+  };
+
+  // Executa no carregamento inicial
+  syncViewportMetrics();
+
+  // Escuta resize e scroll da Visual Viewport com throttle via requestAnimationFrame
+  let rafId = null;
+  const onViewportChange = () => {
+    if (rafId) cancelAnimationFrame(rafId);
+    rafId = requestAnimationFrame(() => {
+      syncViewportMetrics();
+      // Re-executa renderLayout do carrossel se estiver na tela de projetos
+      const projectsSection = document.getElementById("projects-section");
+      if (projectsSection && !projectsSection.classList.contains("hidden")) {
+        if (typeof window.renderProjectsLayout === 'function') {
+          window.renderProjectsLayout();
+        }
+      }
+    });
+  };
+
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener('resize', onViewportChange);
+    window.visualViewport.addEventListener('scroll', onViewportChange);
+  } else {
+    window.addEventListener('resize', onViewportChange);
+  }
+
+  // Suporte a mudanças de orientação (Paisagem ↔ Retrato)
+  window.addEventListener('orientationchange', () => {
+    setTimeout(syncViewportMetrics, 100);
+  });
+}
+
 document.addEventListener("DOMContentLoaded", async () => {
+  // Calibra --app-height, --app-width e safe-areas antes de qualquer renderização
+  initDynamicMobileViewport();
+
   Navbar.init();
   initAdminRouter();
   
@@ -301,6 +371,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   
   initScrollReveal();
   initBentoTilt();
+
 
   // --- LÓGICA DE ROTEAÇÃO DETERMINÍSTICA E DEEP LINKING ---
   document.addEventListener("projectsReady", (event) => {
@@ -330,17 +401,69 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   });
 
-  // --- LÓGICA DO BOTÃO EXPLORAR (TRANSIÇÃO SPA) ---
+  // --- ORQUESTRADOR DO LINK/OVERLAY INVISÍVEL (#explore-btn) ---
   const exploreBtn = document.getElementById("explore-btn");
   const backToHomeBtn = document.getElementById("back-to-home-btn");
 
   if (exploreBtn) {
-    exploreBtn.addEventListener("click", (e) => {
-      e.preventDefault();
+    let lastExecutionTime = 0;
+    const wrapper = exploreBtn.closest(".explore-btn-wrapper");
+
+    const executeTransition = () => {
+      const now = performance.now();
+      // Trava temporal anti-duplicação (700ms)
+      if (now - lastExecutionTime < 700) return;
+      lastExecutionTime = now;
+
+      // Adiciona classe de feedback tátil no wrapper
+      if (wrapper) wrapper.classList.add("btn-pressed");
+
       transitionToProjects();
+
+      setTimeout(() => {
+        if (wrapper) wrapper.classList.remove("btn-pressed");
+      }, 600);
+    };
+
+    // 1. Clique nativo direto no link invisível (sem atrito de texto)
+    exploreBtn.addEventListener("click", (e) => {
+      if (e.cancelable) e.preventDefault();
+      executeTransition();
     });
+
+    // 2. Rastreamento de toque de alta precisão contra tremor do polegar
+    let startX = 0, startY = 0, startTime = 0, isTracking = false;
+
+    exploreBtn.addEventListener("pointerdown", (e) => {
+      isTracking = true;
+      startX = e.clientX;
+      startY = e.clientY;
+      startTime = performance.now();
+      try { exploreBtn.setPointerCapture(e.pointerId); } catch (_) {}
+    });
+
+    exploreBtn.addEventListener("pointerup", (e) => {
+      if (!isTracking) return;
+      isTracking = false;
+      try { exploreBtn.releasePointerCapture(e.pointerId); } catch (_) {}
+
+      const dx = Math.abs(e.clientX - startX);
+      const dy = Math.abs(e.clientY - startY);
+      const duration = performance.now() - startTime;
+
+      // Se o deslocamento for menor que 16px em menos de 600ms, confirma o clique válido
+      if (dx < 16 && dy < 16 && duration < 600) {
+        if (e.cancelable) e.preventDefault();
+        executeTransition();
+      }
+    });
+
+    exploreBtn.addEventListener("pointercancel", () => {
+      isTracking = false;
+    });
+
   } else {
-    console.warn("[app.js] Botão #explore-btn não encontrado no DOM.");
+    console.warn("[app.js] Elemento #explore-btn não localizado.");
   }
 
   if (backToHomeBtn) {

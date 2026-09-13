@@ -66,10 +66,36 @@
   --dur-persistent: 500ms;
   --dur-micro: 100ms;
   --transition-speed: 0.6s;
+
+  /* ======================================================================
+     ENGENHARIA DE VIEWPORT MOBILE REAL — Safe Areas & Altura Dinâmica
+     Calibradas via JS (initDynamicMobileViewport em app.js).
+     Fallback para 100dvh garante suporte universal mesmo sem JS.
+     ====================================================================== */
+  --app-height: 100dvh;
+  --app-width: 100vw;
+
+  /* Insets de hardware: notch iPhone, Dynamic Island, barra Android */
+  --safe-inset-top: env(safe-area-inset-top, 0px);
+  --safe-inset-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-inset-left: env(safe-area-inset-left, 0px);
+  --safe-inset-right: env(safe-area-inset-right, 0px);
+
+  /* Dimensões dos cards do carrossel (sobrescritas no media query mobile) */
+  --card-w: 170px;
+  --card-h: 250px;
+  --gap: 26px;
 }
 
-* {
-  box-sizing: border-box;
+/* ======================================================================
+   CONTENÇÃO TOTAL DO BODY — Previne o scroll global que quebra o layout
+   mobile quando a barra de URL do Chrome/Safari expande e retrai.
+   ====================================================================== */
+html {
+  width: 100%;
+  height: 100%;
+  height: var(--app-height);
+  overflow: hidden;
 }
 
 body {
@@ -77,8 +103,14 @@ body {
   overflow: hidden;
   background-color: var(--bg);
   font-family: "Inter", sans-serif;
-  height: 100vh; /* Fallback */
-  height: 100dvh; /* Moderno - corrige problemas mobile */
+  width: 100%;
+  height: 100%;
+  height: var(--app-height);
+  position: fixed; /* Ancora o body — elimina o bounce scroll do iOS */
+}
+
+* {
+  box-sizing: border-box;
 }
 
 #canvas {
@@ -652,7 +684,7 @@ LOGIN TRIGGER BUTTON (Navbar - Redesenhado Cyber-Glassmorphic)
   border: 1px solid rgba(77, 118, 255, 0.35);
   padding: 10px 22px;
   border-radius: 30px;
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
   font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 1.5px;
@@ -726,38 +758,203 @@ LOGIN TRIGGER BUTTON (Navbar - Redesenhado Cyber-Glassmorphic)
   font-weight: 600;
 }
 
-/* --- ACTION BUTTON --- */
+/* ======================================================================
+   EXPLORAR PROJETOS: WRAPPER CENTRALIZADO E ANIMAÇÃO DE LEVITAÇÃO
+   ====================================================================== */
+.explore-btn-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: calc(100% - 48px);
+  max-width: 320px;
+  margin: 28px auto 38px auto; /* Centralizado horizontalmente com respiro */
+  z-index: 30;
+  animation: cyberFloat 3.2s ease-in-out infinite;
+}
+
+/* ======================================================================
+   BOTÃO VISUAL: PÍLULA CYBER-GLASSMORPHIC COM PULSO E SHIMMER
+   ====================================================================== */
 .action-btn {
-  background: none;
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 14px; /* Espaçamento exato e confortável entre as letras e a seta */
+  
+  width: 100%;
+  height: 54px;
+  padding: 0 22px;
+  border-radius: 999px;
+  
+  /* Gradiente escuro translúcido e borda neon */
+  background: linear-gradient(
+    135deg,
+    rgba(22, 38, 78, 0.75) 0%,
+    rgba(9, 14, 26, 0.95) 100%
+  );
+  border: 1.5px solid rgba(77, 118, 255, 0.75);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  
+  overflow: hidden; /* Mantém o efeito shimmer contido dentro da pílula */
+  pointer-events: none; /* O clique passa direto para o link invisível de cima */
+  user-select: none;
+  -webkit-user-select: none;
+
+  /* Pulso contínuo de brilho neon */
+  animation: neonGlowPulse 2.6s ease-in-out infinite alternate;
+  transition: transform 0.15s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  will-change: transform, box-shadow;
+}
+
+/* Efeito de Feixe de Luz (Shimmer) cruzando o botão */
+.action-btn::after {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -120%;
+  width: 60%;
+  height: 200%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.18) 50%,
+    transparent 100%
+  );
+  transform: rotate(25deg);
+  animation: shimmerSweep 3.6s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* ======================================================================
+   TIPOGRAFIA CENTRALIZADA E COM RESPIRO
+   ====================================================================== */
+.cta-text {
+  font-family: "Inter", -apple-system, sans-serif;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #ffffff;
+  white-space: nowrap;
+  line-height: 1;
+  text-shadow: 0 0 10px rgba(77, 118, 255, 0.5);
+  margin: 0;
+  padding: 0;
+}
+
+/* Círculo da Seta com Microanimação Direcional */
+.arrow-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: rgba(77, 118, 255, 0.28);
+  border: 1px solid rgba(77, 118, 255, 0.55);
+  flex-shrink: 0;
+  animation: arrowNudge 1.8s ease-in-out infinite;
+}
+
+.arrow-icon svg {
+  stroke: #ffffff;
+  display: block;
+}
+
+/* ======================================================================
+   CAMADA FUNCIONAL: LINK INVISÍVEL NA FRENTE DE TUDO (OVERLAY)
+   ====================================================================== */
+.explore-btn-overlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.001); /* Transparente mas 100% clicável */
+  border-radius: 999px;
   border: none;
   cursor: pointer;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  color: white;
-  animation: float 2s ease-in-out infinite;
-  margin-bottom: 20px;
-  transition: opacity 0.3s ease;
+  z-index: 50; /* Garante que fique na frente de qualquer elemento */
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  text-decoration: none;
+  display: block;
 }
 
-.action-btn:hover {
-  opacity: 0.7;
+/* Feedback Tátil Visual quando o Link é Pressionado */
+.explore-btn-overlay:active ~ .action-btn,
+.explore-btn-wrapper.btn-pressed .action-btn {
+  transform: scale(0.95);
+  background: rgba(30, 55, 120, 0.9) !important;
+  border-color: #00ffcc !important;
+  box-shadow: 0 0 25px rgba(0, 255, 204, 0.6) !important;
+  transition: transform 0.06s ease;
 }
 
-.cta-text {
-  font-size: 0.9rem;
-  font-weight: 700;
-  letter-spacing: 3px;
-  margin-bottom: 10px;
-}
+/* ======================================================================
+   KEYFRAMES DE ANIMAÇÃO CIBERNÉTICA
+   ====================================================================== */
 
-@keyframes float {
-  0%,
-  100% {
+/* 1. Levitação Vertical Suave */
+@keyframes cyberFloat {
+  0%, 100% {
     transform: translateY(0);
   }
   50% {
-    transform: translateY(-10px);
+    transform: translateY(-6px);
+  }
+}
+
+/* 2. Pulso de Aura Neon Alternante */
+@keyframes neonGlowPulse {
+  0% {
+    border-color: rgba(77, 118, 255, 0.65);
+    box-shadow:
+      0 0 15px rgba(37, 73, 211, 0.35),
+      inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  }
+  100% {
+    border-color: rgba(0, 210, 255, 0.85);
+    box-shadow:
+      0 0 24px rgba(0, 210, 255, 0.45),
+      inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  }
+}
+
+/* 3. Varredura da Lâmina de Luz (Shimmer) */
+@keyframes shimmerSweep {
+  0% {
+    left: -120%;
+  }
+  30%, 100% {
+    left: 220%;
+  }
+}
+
+/* 4. Movimento Direcional na Seta */
+@keyframes arrowNudge {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(3px);
+  }
+}
+
+/* ======================================================================
+   COMPATIBILIDADE MOBILE ESTREITA
+   ====================================================================== */
+@media (max-width: 768px) {
+  /* Mantém as animações ATIVAS no mobile, anulando restrições antigas */
+  .explore-btn-wrapper {
+    animation: cyberFloat 3.2s ease-in-out infinite !important;
+  }
+
+  .action-btn {
+    animation: neonGlowPulse 2.6s ease-in-out infinite alternate !important;
   }
 }
 
@@ -768,13 +965,13 @@ LOGIN TRIGGER BUTTON (Navbar - Redesenhado Cyber-Glassmorphic)
 /* --- PROJECT SECTION STYLES --- */
 
 .projects-section {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100vh;
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: var(--app-height);
   z-index: 10;
-  contain: paint;
+  overflow: hidden;
+  contain: strict; /* Isolamento total: nenhum filho vaza pra fora */
 }
 
 /* --- Search Bar no modo Projetos --- */
@@ -794,9 +991,11 @@ LOGIN TRIGGER BUTTON (Navbar - Redesenhado Cyber-Glassmorphic)
 
 /* Container de Demonstração */
 #demo {
-  position: relative;
+  position: absolute;
+  inset: 0;
   width: 100%;
-  height: 100vh;
+  height: 100%;
+  overflow: hidden;
   z-index: 1;
 }
 
@@ -1096,67 +1295,190 @@ LOGIN TRIGGER BUTTON (Navbar - Redesenhado Cyber-Glassmorphic)
   z-index: 200;
 }
 
-/* Responsividade Mobile-First */
+/* ======================================================================
+   RESPONSIVIDADE MOBILE — Correção Estrutural com Safe Areas
+   Resolve o colapso visual identificado na captura do Android 14/Chrome:
+   - .details engolia a tela (bottom: 240px + padding: 40px)
+   - Miniaturas extrapolavam a largura (4 cards > 360px de viewport)
+   - Paginação ficava sob os botões virtuais do sistema
+   ====================================================================== */
 @media (max-width: 768px) {
-  .details {
-    /* Ajuste para evitar sobreposição nas imagens de baixo */
-    top: auto;
-    bottom: calc(120px + 120px);
-    left: 5%;
-    width: 90%;
-    transform: none;
+  :root {
+    --card-w: 76px;
+    --card-h: 114px;
+    --gap: 10px;
   }
 
-  .title-main {
-    /* Font-size menor e line-height maior para respirar no mobile */
-    font-size: clamp(24px, 7.5vw, 45px);
-    line-height: 1.15;
+  /* Estabilização do botão Explorar — Lei de Fitts + Hitbox expandida */
+  .action-btn {
+    /* 1. Anula o deslocamento oscilante — o alvo para de fugir do polegar */
+    animation: none !important;
+    transform: none !important;
+
+    /* 2. Hitbox expandida para a Thumb Zone (mínimo W3C: 48px) */
+    width: calc(100% - 48px);
+    max-width: 320px;
+    height: 52px;
+    padding: 0 24px;
+    margin-bottom: 24px;
+
+    /* 3. Reforço de contraste e elevação na tela do smartphone */
+    background: linear-gradient(
+      135deg,
+      rgba(37, 73, 211, 0.45) 0%,
+      rgba(11, 15, 25, 0.95) 100%
+    );
+    border: 1.5px solid rgba(77, 118, 255, 0.65);
+    box-shadow:
+      0 8px 25px rgba(0, 0, 0, 0.7),
+      0 0 20px rgba(37, 73, 211, 0.3),
+      inset 0 1px 0 rgba(255, 255, 255, 0.3);
   }
 
-  .desc {
-    /* Esconde no mobile para ganhar espaço */
-    display: none;
+  .cta-text {
+    font-size: 0.85rem;
+    letter-spacing: 1.5px;
   }
 
-  .pagination {
-    bottom: 15px;
-    gap: 20px;
+  .arrow-icon {
+    width: 30px;
+    height: 30px;
+    background: rgba(77, 118, 255, 0.4);
   }
 
-  /* Melhor contraste para botões de paginação */
-  .arrow, .slide-numbers {
-    color: rgba(255, 255, 255, 0.95);
-    background: rgba(0, 0, 0, 0.4);
-    border-radius: 50%;
-    backdrop-filter: blur(5px);
+  /* Botão Voltar alinhado à Safe Area superior */
+  .back-nav-btn {
+    top: calc(var(--safe-inset-top) + 12px) !important;
+    left: calc(var(--safe-inset-left) + 16px) !important;
+    padding: 6px 12px;
+    font-size: 0.75rem;
+    background: rgba(11, 15, 25, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    z-index: 600;
   }
 
-  .progress-bar {
-    display: none;
-  }
-
-  .slide-numbers {
-    font-size: 24px;
-    background: transparent;
-    text-shadow: 0 2px 10px rgba(0,0,0,0.8);
-  }
-
-  .arrow {
-    width: 42px;
-    height: 42px;
-  }
-
-  /* Busca no mobile: fica abaixo do botão voltar no painel de projetos */
+  /* Barra de busca: contida logo abaixo do botão voltar (com mais respiro) */
   .projects-section .search-wrapper {
-    top: 65px;
-    right: auto;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 90%;
+    top: calc(var(--safe-inset-top) + 65px) !important;
+    left: 50% !important;
+    right: auto !important;
+    transform: translateX(-50%) !important;
+    width: calc(100% - 32px) !important;
+    max-width: 440px !important;
+    z-index: 550;
   }
 
   .projects-section .search-wrapper .search-container {
     width: 100% !important;
+    height: 46px !important;
+    background: rgba(11, 15, 25, 0.85);
+  }
+
+  #search {
+    font-size: 0.85rem !important;
+  }
+
+  /* ─── PAINEL .details ───
+     Ancorado pelo topo, abaixo da busca (com mais respiro) */
+  .details {
+    top: calc(var(--safe-inset-top) + 125px) !important;
+    bottom: auto !important;
+    left: 16px !important;
+    right: 16px !important;
+    width: calc(100% - 32px) !important;
+    max-width: none !important;
+    transform: none !important;
+    padding: 16px 18px !important;
+    border-radius: 18px !important;
+    max-height: calc(var(--app-height) * 0.44) !important;
+    overflow: hidden !important;
+  }
+
+  .place-box {
+    margin-bottom: 6px !important;
+  }
+
+  .place-box .text {
+    font-size: 0.65rem !important;
+    letter-spacing: 3px !important;
+  }
+
+  .title-main {
+    font-size: clamp(20px, 5.5vw, 28px) !important;
+    line-height: 1.15 !important;
+    letter-spacing: -0.5px !important;
+    -webkit-line-clamp: 2 !important;
+    display: -webkit-box !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+  }
+
+  /* Descrição oculta no mobile — preserva espaço visual para fundo e miniaturas */
+  .desc {
+    display: none !important;
+  }
+
+  .cta {
+    margin-top: 12px !important;
+    gap: 10px !important;
+  }
+
+  .btn-icon {
+    width: 40px !important;
+    height: 40px !important;
+    border-radius: 10px !important;
+  }
+
+  .btn-icon svg {
+    width: 18px !important;
+    height: 18px !important;
+  }
+
+  .btn-discover {
+    padding: 10px 20px !important;
+    font-size: 9px !important;
+    letter-spacing: 1.5px !important;
+    border-radius: 10px !important;
+  }
+
+  /* ─── PAGINAÇÃO ───
+     Ancorada rigorosamente acima dos botões virtuais do SO via safe-area-inset-bottom */
+  .pagination {
+    bottom: calc(10px + var(--safe-inset-bottom)) !important;
+    left: 16px !important;
+    width: calc(100% - 32px) !important;
+    gap: 14px !important;
+  }
+
+  .arrow {
+    width: 40px !important;
+    height: 40px !important;
+    background: rgba(11, 15, 25, 0.75) !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    backdrop-filter: blur(8px) !important;
+    -webkit-backdrop-filter: blur(8px) !important;
+  }
+
+  .arrow svg {
+    width: 18px !important;
+    height: 18px !important;
+  }
+
+  /* Progress bar oculta — economiza largura para os controles de toque */
+  .progress-bar {
+    display: none !important;
+  }
+
+  .slide-numbers {
+    font-size: 22px !important;
+    width: 40px !important;
+    height: 32px !important;
+    opacity: 0.8 !important;
+    background: transparent !important;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.9) !important;
   }
 }
 

@@ -57,44 +57,60 @@ export async function showFeed(searchTerm) {
 }
 
 function renderLayout(isFirstLoad = false) {
-  const { innerWidth: w, innerHeight: h } = window;
+  // Leitura precisa da área líquida disponível via VisualViewport API
+  const w = window.visualViewport ? window.visualViewport.width : window.innerWidth;
+  const h = window.visualViewport ? window.visualViewport.height : window.innerHeight;
   const isMobile = w < 768;
 
-  const cardW = isMobile ? 80 : 170;
-  const cardH = isMobile ? 120 : 250;
-  const gap = isMobile ? 10 : 26;
+  // Dimensões dinâmicas dos cards — mobile proporcional ao viewport real
+  const cardW = isMobile ? Math.min(Math.floor(w * 0.22), 82) : 170;
+  const cardH = isMobile ? Math.floor(cardW * 1.5) : 250;
+  const gap = isMobile ? 8 : 26;
 
   const [active, ...rest] = order;
 
-  // Card principal expande para ocupar toda a tela
+  // 1. Card de fundo ativo: preenche exatamente a viewport líquida
   gsap.to(`#card-${active}`, {
     x: 0,
     y: 0,
-    width: "100%",
-    height: "100%",
+    width: w,
+    height: h,
     borderRadius: 0,
     zIndex: 1,
-    duration: isFirstLoad ? 0 : 1.2,
+    opacity: 1,
+    scale: 1,
+    filter: "blur(0px)",
+    duration: isFirstLoad ? 0 : 1.1,
     ease: "expo.inOut",
   });
 
-  // Apenas 4 miniaturas 100% visíveis, a 5ª fica esfumaçada saindo da tela.
-  const maxVisible = 4;
+  // 2. Extração dinâmica da safe-area-inset-bottom do CSS
+  const computedRoot = getComputedStyle(document.documentElement);
+  const safeBottomRaw = computedRoot.getPropertyValue("--safe-inset-bottom").trim();
+  const safeBottom = parseFloat(safeBottomRaw) || 0;
 
-  // Calcula a largura baseada apenas nas miniaturas visíveis para manter o bloco sempre ancorado à direita
+  // 3. Posição vertical: ancorada acima da paginação com folga de segurança
+  // Paginação mobile ocupa ~52px de altura útil a partir da base
+  const paginationOffset = isMobile ? (54 + safeBottom) : 60;
+  const startY = h - cardH - paginationOffset - (isMobile ? 12 : 30);
+
+  // 4. Quantidade de miniaturas visíveis
+  // Mobile suporta no máx 2 nítidas + 1 fantasma (evita overflow horizontal em 360px)
+  const maxVisible = isMobile ? 2 : 4;
   const itemsToFit = Math.min(rest.length, maxVisible);
-  const totalWidth = (cardW + gap) * itemsToFit;
-  let startX = w - totalWidth - w * 0.05;
+  const totalTrackWidth = (cardW + gap) * itemsToFit;
 
-  // Garante que as miniaturas não transbordam para a esquerda (cobre o texto no mobile)
-  const minSafeX = isMobile ? 10 : 20;
+  // Ancoragem horizontal alinhada à margem direita
+  const rightMargin = isMobile ? 16 : (w * 0.05);
+  let startX = w - totalTrackWidth - rightMargin;
+
+  // Limite seguro à esquerda para não ultrapassar a margem
+  const minSafeX = isMobile ? 16 : 20;
   if (startX < minSafeX) {
     startX = minSafeX;
   }
 
-  // Posição vertical das miniaturas: base da tela com margem de segurança
-  const startY = h - cardH - (isMobile ? 90 : 50);
-
+  // 5. Posicionamento cinemático das miniaturas
   rest.forEach((id, index) => {
     let opacity = 1;
     let scale = 1;
@@ -102,20 +118,20 @@ function renderLayout(isFirstLoad = false) {
     let blurAmount = 0;
 
     if (index < maxVisible) {
-      // As 4 primeiras miniaturas são perfeitamente visíveis
+      // Miniaturas visíveis nítidas
       opacity = 1;
       scale = 1;
       blurAmount = 0;
     } else if (index === maxVisible) {
-      // A 5ª miniatura é o "fantasma" que indica o loop infinito
-      opacity = 0.3;
-      scale = 0.9;
-      blurAmount = 4; // Um leve desfoque para dar efeito esfumaçado
+      // Miniatura fantasma — indica loop infinito
+      opacity = isMobile ? 0.4 : 0.3;
+      scale = 0.88;
+      blurAmount = isMobile ? 2 : 4;
     } else {
-      // Da 6ª em diante, ficam totalmente escondidas esperando a vez delas fora da tela
+      // Demais itens aguardam fora do campo de visão à direita
       opacity = 0;
-      scale = 0.8;
-      xPos = w + cardW; // Joga pra fora da tela na direita
+      scale = 0.75;
+      xPos = w + cardW + 50;
     }
 
     gsap.to(`#card-${id}`, {
@@ -126,25 +142,28 @@ function renderLayout(isFirstLoad = false) {
       opacity: opacity,
       scale: scale,
       filter: `blur(${blurAmount}px)`,
-      borderRadius: 12,
-      zIndex: 10 - index, // Z-index decrescente para que quem vem de trás fique por baixo
-      duration: isFirstLoad ? 0 : 1.2,
+      borderRadius: isMobile ? 10 : 12,
+      zIndex: 10 - index,
+      duration: isFirstLoad ? 0 : 1.1,
       ease: "expo.inOut",
       delay: isFirstLoad ? 0 : index * 0.03,
     });
   });
 
-  // Atualiza numeração e barra de progresso
+  // 6. Atualiza numeração
   order.forEach((id, index) => {
     gsap.to(`#num-${id}`, {
-      y: index === 0 ? 0 : 50,
+      y: index === 0 ? 0 : 40,
       opacity: index === 0 ? 1 : 0,
-      duration: 0.6,
+      duration: 0.5,
     });
   });
 
   const progress = ((active + 1) / data.length) * 100;
-  gsap.to("#progress", { width: `${progress}%`, duration: 0.8 });
+  const progressBar = document.getElementById("progress");
+  if (progressBar) {
+    gsap.to(progressBar, { width: `${progress}%`, duration: 0.8 });
+  }
 }
 
 function updateText() {
